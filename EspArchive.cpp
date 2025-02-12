@@ -1,9 +1,9 @@
-#include "EspArFs.h"
+#include "EspArchive.h"
 #include "hash32.h"
 
 
-ArFs::FileInfo ArFs::preprocess(uint32_t length, uint32_t offset, const char * fileName){
-    ArFs::FileInfo fi;
+Archive::FileInfo Archive::preprocess(uint32_t length, uint32_t offset, const char * fileName){
+    Archive::FileInfo fi;
     // Clear the CertInfo
     memset(&fi, 0, sizeof(fi));
     fi.nameHash = Hash32::Hash(fileName);

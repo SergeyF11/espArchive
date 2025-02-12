@@ -17,7 +17,7 @@
 
 #define magicStr "!<arch>\n"
 #define constLength(array) (((sizeof(array))/(sizeof(array[0])))-1) 
-class ArFs {
+class Archive {
     public:
     struct FileInfo {
         uint32_t nameHash;
@@ -221,25 +221,25 @@ class ArFs {
         index.close();
     };
 
-    ArFsFile open(const FileInfo& fi){
+    ArchiveFile open(const FileInfo& fi){
         debugPrintf("File info is %s\n", fi.valid()? "valid": "INVALID");
         if( fi ){
             debugPrintf("Hash[%lu]=> %lu[%lu]\n", fi.nameHash, fi.offset, fi.length );
             data = fs->open( dataFile, "r");
             if ( data ) 
-                return ArFsFile( &data, fi.offset, fi.length );
+                return ArchiveFile( &data, fi.offset, fi.length );
             else    
                 debugPrintf("Error open data file\n");
         }
-        return ArFsFile();
+        return ArchiveFile();
     };
-    ArFsFile open(const char * fileName){
+    ArchiveFile open(const char * fileName){
         debugPrintf("%s\n", fileName );
         //auto nameHash = Hash32::hash(fileName);
         FileInfo fi = _getFileInfo(fileName);
         return open(fi);
         };
-    ArFsFile open(const uint32_t hashName){
+    ArchiveFile open(const uint32_t hashName){
         debugPrintf( "%lu", hashName );
         //return open(_getFileInfo( hashName ));
         FileInfo fi = _getFileInfo(hashName);
@@ -375,7 +375,7 @@ class ArFs {
 
     /// @brief Для работы с архивом как источником файлов
     /// @param fs 
-    ArFs(FS& fs ) :
+    Archive(FS& fs ) :
     fs(&fs), dataFile(nullptr), indexFile(nullptr){
         checkFs();
     };
@@ -384,7 +384,7 @@ class ArFs {
     /// @param fs 
     /// @param dataFile 
     /// @param indexFile 
-    ArFs(FS& fs, const char * dataFile, const char * indexFile=nullptr ) :
+    Archive(FS& fs, const char * dataFile, const char * indexFile=nullptr ) :
     fs(&fs), dataFile(strdup(dataFile)), indexFile(strdup(setIndexFile(indexFile)))
     {
         if (! checkFs() ) return;
@@ -394,8 +394,8 @@ class ArFs {
         }
 
     };
-    ~ArFs(){
+    ~Archive(){
         close();
     };
-    friend ArFsFile;
+    friend ArchiveFile;
 };

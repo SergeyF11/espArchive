@@ -1,5 +1,5 @@
 #pragma once
-#include "EspArFs.h"
+#include "EspArchive.h"
 #include "hash32.h"
 
 #define ARFILE_DEBUG
@@ -9,7 +9,7 @@
     #define debugPrintf
 #endif
 
-class ArFsFile {
+class ArchiveFile {
         private:
         File * data;
         const uint32_t start;
@@ -18,10 +18,10 @@ class ArFsFile {
         
         uint32_t seekPosition;
         public:
-        ArFsFile() :
+        ArchiveFile() :
             data(nullptr), start(0),len(0)
         { debugPrintf("Created null file\n"); };
-        ArFsFile(File *_file, const uint32_t start, const uint32_t len) :
+        ArchiveFile(File *_file, const uint32_t start, const uint32_t len) :
             data(_file),start(start), len(len)
         { 
             
@@ -35,19 +35,19 @@ class ArFsFile {
             }
 
         };
-        // ArFsFile(File *_file, ArFs::FileInfo& fi) :
-        //     ArFsFile(_file, fi.offset, fi.length)
+        // ArchiveFile(File *_file, ArFs::FileInfo& fi) :
+        //     ArchiveFile(_file, fi.offset, fi.length)
         // {};
-        ~ArFsFile(){
+        ~ArchiveFile(){
             debugPrintf("Destroy object");
             //close();
         };
         operator bool() const { return data != nullptr; }; 
-        ArFsFile& operator=(const ArFsFile& src) noexcept {
+        ArchiveFile& operator=(const ArchiveFile& src) noexcept {
             if (this != &src) {
                 //close();
                 seekPosition = 0;
-                new ( this ) ArFsFile(src.data,src.start,src.len);
+                new ( this ) ArchiveFile(src.data,src.start,src.len);
                 debugPrintf("Copy '%s', %lu[%lu]\n", data->fullName(), start, len );
             }
             return *this;

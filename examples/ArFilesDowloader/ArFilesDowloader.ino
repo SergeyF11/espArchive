@@ -1,5 +1,5 @@
 #include <LittleFS.h>
-#include <EspArFs.h>
+#include <EspArchive.h>
 #include "timeStr.h"
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
@@ -88,7 +88,7 @@ void setup(){
     auto start = millis();
     Serial.printf("Start ArFs define in %lu\n", start );
 
-    ArFs arFs( LittleFS, "/test.ar");
+    Archive arFs( LittleFS, "/test.ar");
     HTTPClient https;
     if ( https.begin( *client, "https://smilart.ru/download/iso/test.ar")){
         int httpCode = https.GET();

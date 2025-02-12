@@ -1,5 +1,5 @@
 #include <LittleFS.h>
-#include <EspArFs.h>
+#include <EspArchive.h>
 #include "timeStr.h"
 
 String listDirToString( FS& fs, const String& dirname, bool subDir=false){
@@ -72,7 +72,7 @@ void setup(){
     auto start = millis();
     Serial.printf("Start ArFs define in %lu\n", start );
 
-    ArFs arFs( LittleFS, "/certs.ar");
+    Archive arFs( LittleFS, "/certs.ar");
     if ( arFs.getError() != ArFs::Errors::Ok ){
         Serial.print("Error ArFs="); Serial.println( arFs.errorStr() );
         Serial.println( arFs.getError() );
@@ -92,7 +92,7 @@ void setup(){
 
     //preprocess ( offset= 172328 , 664 bytes, file 'ca_154.der')
     start =millis();
-    ArFs::FileInfo info = arFs.getFileInfo("ca_154.der");
+    Archive::FileInfo info = arFs.getFileInfo("ca_154.der");
     
 
     if( info ){

@@ -1,0 +1,6 @@
+!<arch>
+test.json/      0           0     0     644     13        `
+{test:"json"}
+test.txt/       0           0     0     644     16        `
+text
+multi line

@@ -304,8 +304,9 @@ class Archive {
             // magic OK
             debugPrintf("Magic found "); debugWrite(magic, sizeof(magic) );
             //read file header
-            while ( stream.available() > 60 ) {
-                delay(0);
+            while ( stream.available() ) {
+                if ( stream.available() <60 ) delay(10);
+                else delay(0);
                 uint8_t fileHeader[60];
                 // 0..15 = filename in ASCII
                 // 48...57 = length in decimal ASCII
@@ -346,6 +347,12 @@ class Archive {
                 }
                 fileCounter++;
                 download += writed;
+                // выравнивание
+                if (download & 1) {
+                    uint8_t x;
+                    stream.read(&x, 1);
+                    download++;
+                }
             }
         } else debugPrintf("No stream. available(%d)\n", stream.available() );
         if ( fileCounter ) error = Errors::Ok;

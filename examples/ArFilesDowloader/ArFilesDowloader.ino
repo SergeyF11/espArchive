@@ -1,67 +1,16 @@
 #include <LittleFS.h>
+
 #include <EspArchive.h>
 #include "timeStr.h"
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiClientSecureBearSSL.h>
 
+#include "fsUtils.h"
+
 #define MY_CREDENTIAL
 #include <my.h>
 
-
-String listDirToString( FS& fs, const String& dirname, bool subDir=false){
-//  D_PRINT("List dir: ", dirname);
-  
-  String out;  
-  if( ! subDir ) {
-    out = String(dirname);
-    out.concat( F("\r\n"));
-  }  
-  Dir root = fs.openDir(dirname);
-  
-  while (root.next()) {
-    File file = root.openFile("r");
-    out.concat(F(" "));  
-    if ( subDir ) out.concat(F(" ")); 
-    if ( file.isDirectory()){
-      out += root.fileName();
-      out.concat( F("/\r\n"));
-      String filePath = dirname;
-      filePath += root.fileName();
-      out += listDirToString(fs, filePath, true);    
-      
-    } else 
-      if (root.isFile()){   
-        out += (root.fileName());
-        out.concat(F(" - "));
-        out += file.size();
-        out.concat(F(" bytes "));
-    }
-    
-    time_t cr = file.getCreationTime();
-    time_t lw = file.getLastWrite();
-    file.close();
-    out.concat(F(" C:")); 
-    out += Time::toStr( cr);
-    out.concat(F(" M:"));
-    out += Time::toStr( lw);
-    out.concat(F("\r\n"));
-    Time::_free_buf();
-  }
-  if ( ! subDir ){
-    out.concat(F("FS uses "));
-    FSInfo info;
-    LittleFS.info(info);
-    out += info.usedBytes;
-    out += F(" bytes of ");
-    out += info.totalBytes;
-    out.concat(F("\r\n"));        
-    //nextLine(out);
-  }    
-  
-//  D_PRINT("Listdir result: ", out);  
-  return out;
-};
 
 
 void setup(){
@@ -85,6 +34,10 @@ void setup(){
     return;
    }
     Serial.println("LittleFS ok");
+   ///clean files
+    auto i = removeFiles(LittleFS, "test.txt::test.ar::test.ix::test.json", "::");
+    if ( i > 0) Serial.printf("%d files deleted\n",i);
+
     auto start = millis();
     Serial.printf("Start ArFs define in %lu\n", start );
 
@@ -104,7 +57,12 @@ void setup(){
            if ( writed ){
             Serial.print( writed );
             Serial.println(" files"); 
-            Serial.println( listDirToString(LittleFS, "/"));
+            FsLs ls(&LittleFS,"/");
+            Serial.println( ls );
+            //DirFs::printTo(Serial, LittleFS,"/");
+            // String ls = listDirToString(LittleFS, "/");
+            // Serial.println( ls );
+
            } else {
             Serial.print("Error:"); Serial.println( arFs.errorStr() );
            }

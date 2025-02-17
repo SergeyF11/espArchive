@@ -4,7 +4,9 @@
 
 #define ARFILE_DEBUG
 #ifdef ARFILE_DEBUG
+#ifndef debugPrintf
     #define debugPrintf(fmt, ...) { Serial.print(__PRETTY_FUNCTION__); Serial.println(__LINE__); Serial.printf((PGM_P)PSTR(fmt), ##__VA_ARGS__); }
+#endif
 #else
     #define debugPrintf
 #endif

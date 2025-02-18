@@ -1,6 +1,7 @@
 #pragma once
-#include <Arduino.h>
 
+#include <sys/types.h>
+#include <sys/pgmspace.h>
 
 namespace Hash32 {
 // хэш строки, выполняется на этапе компиляции

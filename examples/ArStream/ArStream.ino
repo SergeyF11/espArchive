@@ -1,83 +1,54 @@
 #include <LittleFS.h>
 #include <EspArchive.h>
-#include "timeStr.h"
+#include <WiFiClient.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiClientSecureBearSSL.h>
-#include <hash32.h>
+#include <hash/hash32.h>
+#include "fsUtils.h"
 
-#define MY_CREDENTIAL
+//#define MY_CREDENTIAL
+#ifdef MY_CREDENTIAL
 #include <my.h>
+#else
+#define WIFI_SSID "YOUR_WIFI"
+#define WIFI_PSK  "YOUR_PSK"
 
-
-String listDirToString( FS& fs, const String& dirname, bool subDir=false){
-//  D_PRINT("List dir: ", dirname);
-  
-  String out;  
-  if( ! subDir ) {
-    out = String(dirname);
-    out.concat( F("\r\n"));
-  }  
-  Dir root = fs.openDir(dirname);
-  
-  while (root.next()) {
-    File file = root.openFile("r");
-    out.concat(F(" "));  
-    if ( subDir ) out.concat(F(" ")); 
-    if ( file.isDirectory()){
-      out += root.fileName();
-      out.concat( F("/\r\n"));
-      String filePath = dirname;
-      filePath += root.fileName();
-      out += listDirToString(fs, filePath, true);    
-      
-    } else 
-      if (root.isFile()){   
-        out += (root.fileName());
-        out.concat(F(" - "));
-        out += file.size();
-        out.concat(F(" bytes "));
-    }
-    
-    time_t cr = file.getCreationTime();
-    time_t lw = file.getLastWrite();
-    file.close();
-    out.concat(F(" C:")); 
-    out += Time::toStr( cr);
-    out.concat(F(" M:"));
-    out += Time::toStr( lw);
-    out.concat(F("\r\n"));
-    Time::_free_buf();
-  }
-  if ( ! subDir ){
-    out.concat(F("FS uses "));
-    FSInfo info;
-    LittleFS.info(info);
-    out += info.usedBytes;
-    out += F(" bytes of ");
-    out += info.totalBytes;
-    out.concat(F("\r\n"));        
-    //nextLine(out);
-  }    
-  
-//  D_PRINT("Listdir result: ", out);  
-  return out;
-};
-
+#endif
 
 void setup(){
+ 
+
     Serial.begin(115200);
     do{
         delay(300);
     } while( !Serial );
     Serial.println();
 
+#ifdef MY_CREDENTIAL    
     if( ! myWiFiConnect() ){
         Serial.println("ERROR: wifi connection");
         return;
     } else {
         Serial.println("Connected WiFi");
     }
+#else
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(WIFI_SSID, WIFI_PSK);
+    auto startMs = millis();
+    while (WiFi.status() != WL_CONNECTED) {
+        if ( (millis() -startMs) >= periodMs ) {
+            Serial.print("Can't to connect to ");
+            Serial.println( WIFI_SSID);
+            return;
+        }
+        Serial.print('.');
+        delay(500); 
+    }
+    Serial.print("Connected to ");
+    Serial.println( WIFI_SSID);
+#endif
+
     std::unique_ptr<BearSSL::WiFiClientSecure> client(new BearSSL::WiFiClientSecure);
     client->setInsecure();
 
@@ -88,6 +59,7 @@ void setup(){
     Serial.println("LittleFS ok");
     auto start = millis();
     Serial.printf("Start ArFs define in %lu\n", start );
+    FsLs ls(LittleFS, "/");
 
     Archive arFs( LittleFS, "/test.ar");
     HTTPClient https;
@@ -104,6 +76,7 @@ void setup(){
            if ( writed ){
             Serial.print("Archive size ="); Serial.println( writed );
             //Serial.println( listDirToString(LittleFS, "/"));
+            Serial.print(ls);
             
             // build index
             if ( arFs.begin(false) ){

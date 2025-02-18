@@ -8,7 +8,18 @@
 
 Archive	KEYWORD1
 ArchiveFile	KEYWORD1
+Hash32 KEYWORD1
+FileInfo KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
+
+getError KEYWORD2
+downloadFiles KEYWORD2
+getCountFiles KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
